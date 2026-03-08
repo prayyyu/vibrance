@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>SAAYA</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<script src="https://unpkg.com/scrollreveal"></script>
+</head>
+<body>
+
+<nav>
+  <a href="index.html">Home</a> |
+  <a href="events.html">Events</a> |
+  <a href="register.html">Register</a>
+</nav>
+<div id="particles-js"></div>
+<section class="hero">
+
+<h1 class="animate__animated animate__fadeInDown">SAAYA</h1>
+
+<p class="animate__animated animate__fadeInUp">
+The Ultimate Platform for Campus Events
+</p>
+<a href="events.html" class="btn animate__animated animate__zoomIn">
+Explore Events
+</a>
+
+<h2 id="countdown"></h2>
+</section>
+<section class="gallery">
+
+<h2>SAAYA Moments</h2>
+
+<div class="gallery-container">
+
+<img src="assets/dance.jpg">
+<img src="assets/music.jpg">
+<img src="assets/drama.jpg">
+
+</div>
+
+</section>
+<footer class="footer">
+
+<h3>SAAYA</h3>
+
+<p>Celebrating creativity, culture and talent at AWH Engineering College</p>
+
+<p>Follow us</p>
+
+<div class="social">
+
+<a href="#">Instagram</a>
+<a href="#">Facebook</a>
+<a href="#">YouTube</a>
+
+</div>
+
+<p class="copy">© 2026 SAAYA Festival</p>
+
+</footer>
+<script src="js/script.js"></script>
+<script>
+
+particlesJS("particles-js",{
+particles:{
+number:{value:80},
+size:{value:3},
+move:{speed:2},
+line_linked:{enable:true},
+color:{value:"#9d4edd"}
+}
+});
+
+</script>
+<script>
+
+ScrollReveal().reveal('.hero',{
+delay:200,
+distance:'60px',
+origin:'bottom'
+});
+
+ScrollReveal().reveal('.event-card',{
+delay:300,
+distance:'40px',
+origin:'bottom',
+interval:200
+});
+
+ScrollReveal().reveal('.gallery',{
+delay:200,
+distance:'60px',
+origin:'bottom'
+});
+
+</script>
+</body>
+</html>
