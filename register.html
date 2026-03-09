@@ -1,30 +1,52 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>SAAYA Registration</title>
-  <link rel="stylesheet" href="css/style.css">
+
+<title>Register - SAAYA</title>
+
+<link rel="stylesheet" href="css/style.css">
+
 </head>
+
 <body>
 
-<h1>SAAYA Event Registration</h1>
+<nav>
+  <a href="index.html">Home</a> |
+  <a href="events.html">Events</a> |
+  <a href="register.html">Register</a>
+</nav>
 
-<form>
-  <label>Student Name</label><br>
-  <input type="text" placeholder="Enter your name"><br><br>
+<div class="form-container">
 
-  <label>Register Number</label><br>
-  <input type="text" placeholder="Enter register number"><br><br>
+<h2>SAAYA Event Registration</h2>
 
-  <label>Email</label><br>
-  <input type="email" placeholder="Enter email"><br><br>
+<form id="registerForm">
 
-  <button onclick="showPopup()">Register</button>
+<label>Student Name</label>
+<input type="text" placeholder="Enter your name" required>
+
+<label>Register Number</label>
+<input type="text" placeholder="Enter register number" required>
+
+<label>Email</label>
+<input type="email" placeholder="Enter email" required>
+
+<label>Department</label>
+<select required>
+<option value="">Select Department</option>
+<option>CSE</option>
+<option>ECE</option>
+<option>EEE</option>
+<option>MECH</option>
+<option>CIVIL</option>
+<option>MCA</option>
+</select>
+
+<button type="submit">Register</button>
+
 </form>
-<div id="popup" class="popup">
-<p>✅ Registration Successful!</p>
-<button onclick="closePopup()">OK</button>
+
 </div>
-<p>✔ Registration Successful (Demo)</p>
-<script src="js/script.js"></script>
+
 </body>
 </html>

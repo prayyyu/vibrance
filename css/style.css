@@ -1,14 +1,21 @@
 body{
 font-family:'Poppins', sans-serif;
 margin:0;
-background:linear-gradient(135deg,#1a0033,#3b0a63,#0a2a88);
-min-height:100vh;
+text-align:center;
 color:white;
+min-height:100vh;
+
+/* animated gradient background */
+
+background: linear-gradient(-45deg,#1a0033,#3b0a63,#0a2a88,#7209b7);
+background-size:400% 400%;
+animation:gradientBG 10s ease infinite;
 }
-body {
-  font-family: Arial;
-  text-align: center;
-  background-color: #f2f6ff;
+
+@keyframes gradientBG{
+0%{background-position:0% 50%;}
+50%{background-position:100% 50%;}
+100%{background-position:0% 50%;}
 }
 
 h1 {
@@ -152,9 +159,8 @@ transform:translateY(-10px);
 box-shadow:0 15px 40px rgba(0,0,0,0.4);
 }
 .event-card h3{
-color:#0a3d91;
+color:#ffd700;
 }
-
 .event-card:hover{
 transform:translateY(-5px);
 transition:0.3s;
@@ -185,7 +191,8 @@ color:#0a3d91;
 .gallery{
 padding:50px;
 text-align:center;
-background:#f5f7fb;
+background:rgba(255,255,255,0.05);
+backdrop-filter:blur(10px);
 }
 
 .gallery h2{
@@ -272,6 +279,16 @@ padding:10px;
 width:250px;
 border-radius:20px;
 border:1px solid #ccc;
+font-size:16px;
+}
+
+/* Department dropdown style */
+select{
+padding:10px;
+border-radius:8px;
+border:none;
+margin-top:10px;
+width:100%;
 font-size:16px;
 }
 @media (max-width:768px){
@@ -373,4 +390,41 @@ height:100%;
 top:0;
 left:0;
 z-index:-1;
+}
+.form-container{
+max-width:400px;
+margin:60px auto;
+padding:30px;
+
+background:rgba(255,255,255,0.1);
+backdrop-filter:blur(10px);
+
+border-radius:15px;
+box-shadow:0 10px 30px rgba(0,0,0,0.4);
+}
+
+form{
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+input, select{
+padding:10px;
+border-radius:8px;
+border:none;
+}
+
+button{
+padding:10px;
+background:#9d4edd;
+color:white;
+border:none;
+border-radius:8px;
+font-weight:bold;
+cursor:pointer;
+}
+
+button:hover{
+background:#7209b7;
 }
