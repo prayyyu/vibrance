@@ -9,7 +9,7 @@ var distance = eventDate - now;
 var days = Math.floor(distance / (1000 * 60 * 60 * 24));
 
 document.getElementById("countdown").innerHTML =
-"SAAYA begins in " + days + " days";
+"VIBRANCE begins in " + days + " days";
 
 },1000);
 function showPopup(){

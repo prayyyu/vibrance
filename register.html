@@ -2,12 +2,11 @@
 <html>
 <head>
 
-<title>Register - SAAYA</title>
+<title>Register - VIBRANCE</title>
 
 <link rel="stylesheet" href="css/style.css">
 
 </head>
-
 <body>
 
 <nav>
@@ -18,21 +17,21 @@
 
 <div class="form-container">
 
-<h2>SAAYA Event Registration</h2>
+<h2>VIBRANCE Event Registration</h2>
 
 <form id="registerForm">
 
 <label>Student Name</label>
-<input type="text" placeholder="Enter your name" required>
+<input id="name" type="text" placeholder="Enter your name" required>
 
 <label>Register Number</label>
-<input type="text" placeholder="Enter register number" required>
+<input id="reg" type="text" placeholder="Enter register number" required>
 
 <label>Email</label>
-<input type="email" placeholder="Enter email" required>
+<input id="email" type="email" placeholder="Enter email" required>
 
 <label>Department</label>
-<select required>
+<select id="dept" required>
 <option value="">Select Department</option>
 <option>CSE</option>
 <option>ECE</option>
@@ -44,9 +43,51 @@
 
 <button type="submit">Register</button>
 
+<p id="successMsg"></p>
+
 </form>
 
 </div>
+<script type="module">
 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+
+import { getFirestore, collection, addDoc } 
+from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDM-RJYuTB1-qHU75cBJOVL_W_EpQShr_Q",
+  authDomain: "vibrance-fest-1310a.firebaseapp.com",
+  projectId: "vibrance-fest-1310a",
+  storageBucket: "vibrance-fest-1310a.firebasestorage.app",
+  messagingSenderId: "564934076568",
+  appId: "1:564934076568:web:8ef57661b9129d474208ed"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+document.getElementById("registerForm").addEventListener("submit", async function(e){
+
+e.preventDefault();
+
+const name = document.getElementById("name").value;
+const reg = document.getElementById("reg").value;
+const email = document.getElementById("email").value;
+const dept = document.getElementById("dept").value;
+
+await addDoc(collection(db,"registrations"),{
+name:name,
+register:reg,
+email:email,
+department:dept,
+time:new Date()
+});
+
+document.getElementById("successMsg").innerText = "✔ Registration Successful";
+
+});
+
+</script>
 </body>
 </html>
