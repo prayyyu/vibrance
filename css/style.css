@@ -668,11 +668,6 @@ background:#7209b7;
     transition: 0.3s;
 }
 /* Background */
-body {
-    background: radial-gradient(circle at top, #0f2027, #203a43, #2c5364);
-    color: white;
-    font-family: 'Poppins', sans-serif;
-}
 
 /* Title */
 .leaderboard h1 {
