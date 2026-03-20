@@ -128,7 +128,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // ✅ Get container
-const container = document.getElementById("leaderboard-container");
+const container = document.getElementById("top3");
 
 // ✅ Real-time leaderboard
 onSnapshot(collection(db, "leaderboard"), (snapshot) => {
@@ -136,28 +136,27 @@ onSnapshot(collection(db, "leaderboard"), (snapshot) => {
   let data = [];
 
   snapshot.forEach(doc => {
-    data.push({ id: doc.id, ...doc.data() });
+    data.push(doc.data());
   });
 
-  // Sort by score
   data.sort((a, b) => b.score - a.score);
 
-  // Top 3 only
   const top3 = data.slice(0, 3);
 
   container.innerHTML = "";
 
-  const medals = ["🏆", "🥈", "🥉"];
+  const medals = ["🥇", "🥈", "🥉"];
 
   top3.forEach((dept, index) => {
     container.innerHTML += `
-      <div class="leaderboard-card rank-${index+1}">
-        <h2>${index + 1} ${medals[index]}</h2>
-        <p>${dept.name}</p>
-        <span>${dept.score} Points</span>
+      <div class="top-card rank${index+1}">
+        <h2>${medals[index]}</h2>
+        <h3>${dept.name}</h3>
+        <p>${dept.score} Points</p>
       </div>
     `;
   });
+
 
 });
 
