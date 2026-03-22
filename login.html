@@ -21,6 +21,15 @@
 
 <button type="submit">Login</button>
 
+<p>
+  Didn’t get verification email? 
+  <span onclick="resendEmail()" style="color:#ffd369;cursor:pointer;">
+    Resend
+  </span>
+</p>
+
+<p id="msg"></p>
+
 <p id="msg"></p>
 
 </form>
@@ -51,31 +60,39 @@ const msg = document.getElementById("msg");
 
 form.addEventListener("submit", async (e) => {
 
-e.preventDefault();
+  e.preventDefault();
 
-const email = document.getElementById("email").value;
-const password = document.getElementById("password").value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-msg.innerText = "Logging in...";
+  msg.innerText = "Logging in...";
 
-try {
+  try {
 
-// 🔐 Login user
-await signInWithEmailAndPassword(auth, email, password);
+    // 🔐 Login user
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
 
-msg.innerText = "✔ Login Successful";
+    // 🔒 CHECK EMAIL VERIFICATION (AFTER LOGIN)
+    if (!user.emailVerified) {
+      msg.innerText = "❌ Please verify your email before logging in.";
+      await auth.signOut();
+      return;
+    }
 
-// After successful login
-const urlParams = new URLSearchParams(window.location.search);
-const redirectUrl = urlParams.get('redirect') || 'register.html'; // default if none
-window.location.href = redirectUrl;
+    msg.innerText = "✔ Login Successful";
 
-} catch (error) {
+    // 🔁 Redirect
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirectUrl = urlParams.get('redirect') || 'index.html';
+    window.location.href = redirectUrl;
 
-console.error(error);
-msg.innerText = "❌ " + error.message;
+  } catch (error) {
 
-}
+    console.error(error);
+    msg.innerText = "❌ " + error.message;
+
+  }
 
 });
 

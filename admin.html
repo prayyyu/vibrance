@@ -5,72 +5,35 @@
 
 <link rel="stylesheet" href="css/style.css">
 
-<style>
-.admin-container {
-    max-width: 1000px;
-    margin: 40px auto;
-    padding: 20px;
-}
 
-.form-box {
-    background: rgba(255,255,255,0.08);
-    padding: 25px;
-    border-radius: 15px;
-}
-
-select, button {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 8px;
-    border: none;
-}
-
-button {
-    background: #9d4edd;
-    color: white;
-    cursor: pointer;
-}
-
-.card {
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 10px;
-    background: rgba(255,255,255,0.1);
-}
-
-.table {
-    width: 100%;
-    margin-top: 20px;
-    border-collapse: collapse;
-}
-
-.table th, .table td {
-    padding: 10px;
-    border-bottom: 1px solid #ccc;
-}
-</style>
 
 </head>
 
 <body>
 
 <!-- 🔐 PROTECTED CONTENT -->
-<div id="adminPanel" style="display:none;">
 
-<div class="admin-container">
+<div id="adminPanel">
 
+  <div class="admin-container">
+    <div class="admin-card">
 <h1>📊 Admin Dashboard</h1>
 
 <h2>Add Result</h2>
 
 <select id="eventName">
   <option value="">Event Name</option>
-  <option>Dance</option>
-  <option>Song</option>
-  <option>Mappila pattu</option>
-  <option>Individual song</option>
-  <option>Group song</option>
+  <option>Thiruvathira</option>
+  <option>Singing Western Solo</option>
+  <option>Western Group</option>
+  <option>Debate</option>
+  <option>Folk Dance Boys</option>
+  <option>Group Dance</option>
+  <option>Mime</option>
+  <option>Classical Dance</option>
+  <option>Western Dance</option>
+  <option>Quiz</option>
+  <option>Light Music</option>
 </select>
 
 <!-- 🥇 FIRST -->
@@ -115,8 +78,10 @@ button {
 <button onclick="addResult()">Add Result</button>
 
 </div>
-
+    </div>
+  </div>
 <!-- TABLE -->
+ <div class="admin-container">
 <table class="table" id="resultsTable">
 <thead>
 <tr>
@@ -128,12 +93,14 @@ button {
 </thead>
 <tbody></tbody>
 </table>
-
+ </div>
 <!-- LEADERBOARD -->
-<h2>🏆 Leaderboard</h2>
-<div id="leaderboard"></div>
+<div class="admin-container">
+  <h2>🏆 Leaderboard</h2>
+  <div id="leaderboard"></div>
+</div>
 <h2>👨‍🎓 Student Registrations</h2>
-
+<div class="admin-container">
 <table class="table" id="regTable">
 <thead>
 <tr>
@@ -145,10 +112,10 @@ button {
 </thead>
 <tbody></tbody>
 </table>
-
+</div>
 <button onclick="exportData()">📥 Export CSV</button>
 <!-- 🔥 LOGOUT -->
-<div style="text-align:center; margin-top:40px;">
+<div class="actions">
   <button onclick="logout()" style="
     width:200px;
     background:#ff4d4d;
@@ -182,19 +149,27 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
-
-// 🔐 Auth
+// 🔐 AUTH CHECK (ADD HERE)
 onAuthStateChanged(auth, async (user) => {
-  if (!user) return location.href = "admin-login.html";
 
-  const snap = await getDoc(doc(db,"users",user.uid));
-  if (!snap.exists() || !snap.data().isAdmin) {
-    alert("Access denied");
-    return location.href="index.html";
+  if (!user) {
+    location.href = "admin-login.html";
+    return;
   }
 
-  document.getElementById("adminPanel").style.display="block";
+  const snap = await getDoc(doc(db,"users",user.uid));
+
+  if (!snap.exists() || !snap.data().isAdmin) {
+    alert("Access denied");
+    location.href = "index.html";
+    return;
+  }
+
+  // ✅ SHOW ADMIN PANEL
+  document.getElementById("adminPanel").style.display = "block";
+
 });
+// 🔥 FORCE SEPARATE ADMIN LOGIN
 
 window.logout = async ()=> {
   await signOut(auth);
@@ -250,7 +225,10 @@ window.deleteResult = async function(id){
 };
 
 // ================= EDIT =================
-window.editResult = function(id,data){
+window.editResult = function(id){
+
+  const data = resultsData[id];
+
   document.getElementById("eventName").value = data.eventName;
 
   document.getElementById("firstName").value = data.first.name;
@@ -264,7 +242,6 @@ window.editResult = function(id,data){
 
   window.editId = id;
 };
-
 // ================= REBUILD LEADERBOARD =================
 async function rebuildLeaderboard(){
 
@@ -306,14 +283,14 @@ function clearForm(){
 }
 // ================= RESULTS TABLE =================
 const tableBody=document.querySelector("#resultsTable tbody");
-
+let resultsData = {};
 onSnapshot(collection(db,"results"),snap=>{
   tableBody.innerHTML="";
 
   snap.forEach(docSnap=>{
     const d=docSnap.data();
     const id=docSnap.id;
-
+    resultsData[id] = d;
     tableBody.innerHTML+=`
     <tr>
       <td>${d.eventName}</td>
@@ -321,7 +298,7 @@ onSnapshot(collection(db,"results"),snap=>{
       <td>${d.second.name} (${d.second.dept})</td>
       <td>${d.third.name} (${d.third.dept})</td>
       <td>
-        <button onclick='editResult("${id}", ${JSON.stringify(d)})'>Edit</button>
+        <button onclick="editResult('${id}')">Edit</button>
         <button onclick='deleteResult("${id}")'>Delete</button>
       </td>
     </tr>`;

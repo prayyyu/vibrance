@@ -37,10 +37,22 @@
       <button id="accountBtn" class="btn">Account ⌄</button>
 
       <div id="dropdown" class="dropdown">
-        <a id="loginOption">Login</a>
-        <a id="signupOption">Signup</a>
-        <a id="logoutOption" style="display:none;">Logout</a>
-      </div>
+
+  <!-- Auth options -->
+  <a id="loginOption">Login</a>
+  <a id="signupOption">Signup</a>
+  <a id="logoutOption" style="display:none;">Logout</a>
+
+  <!-- NEW: User Info -->
+  <div id="userSection" style="display:none;">
+    <hr>
+    <p id="userEmail"></p>
+    <p id="eventCount"></p>
+
+    <ul id="eventList"></ul>
+  </div>
+
+</div>
     </div>
 
   </div>
@@ -110,9 +122,17 @@ Explore Events
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } 
 from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
-import { getFirestore, doc, getDoc } 
-from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
-
+import { 
+  getFirestore,
+  doc,
+  getDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+  deleteDoc,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 const firebaseConfig = {
   apiKey: "AIzaSyDM-RJYuTB1-qHU75cBJOVL_W_EpQShr_Q",
   authDomain: "vibrance-fest-1310a.firebaseapp.com",
@@ -130,6 +150,12 @@ const dropdown = document.getElementById("dropdown");
 const loginOption = document.getElementById("loginOption");
 const signupOption = document.getElementById("signupOption");
 const logoutOption = document.getElementById("logoutOption");
+const userSection = document.getElementById("userSection");
+const userEmail = document.getElementById("userEmail");
+const eventList = document.getElementById("eventList");
+const eventCount = document.getElementById("eventCount");
+
+const leaderboardContainer = document.getElementById("leaderboardContainer");
 
 // OPEN / CLOSE DROPDOWN
 accountBtn.addEventListener("click", (e) => {
@@ -162,9 +188,11 @@ onAuthStateChanged(auth, async (user) => {
     signupOption.style.display = "none";
     logoutOption.style.display = "block";
 
+    userSection.style.display = "block"; // ✅ ADD THIS
+
     try {
-      const docRef = doc(db, "users", user.uid);
-      const docSnap = await getDoc(docRef);
+      const docRefUser = doc(db, "users", user.uid);
+      const docSnap = await getDoc(docRefUser);
 
       if(docSnap.exists()){
         accountBtn.innerText = "👤 " + docSnap.data().name + " ⌄";
@@ -176,20 +204,23 @@ onAuthStateChanged(auth, async (user) => {
       accountBtn.innerText = "👤 Account ⌄";
     }
 
+    // 🔥 LOAD EVENTS
+    loadUserEvents(user.uid, user.email);
+
   } else {
 
     loginOption.style.display = "block";
     signupOption.style.display = "block";
     logoutOption.style.display = "none";
 
+    userSection.style.display = "none"; // ✅ ADD THIS
+
     accountBtn.innerText = "Account ⌄";
   }
 
 });
-import { collection, onSnapshot } 
-from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
-const leaderboardContainer = document.getElementById("leaderboardContainer");
+;
 
 onSnapshot(collection(db, "leaderboard"), (snapshot) => {
 
@@ -208,15 +239,83 @@ onSnapshot(collection(db, "leaderboard"), (snapshot) => {
 
   data.forEach((dept, index) => {
 
-    leaderboardContainer.innerHTML += `
-      <div class="leaderboard-card">
-        ${medals[index] || ""} ${dept.name} - ${dept.score} pts
-      </div>
-    `;
+   leaderboardContainer.innerHTML += `
+  <div class="leaderboard-card">
+    <span>${medals[index] ||  + (index+1)}</span>
+    <span>${dept.name}</span>
+    <span>${dept.score} pts</span>
+  </div>
+`;
 
   });
 
 });
+// ================= 3D EFFECT =================
+setTimeout(() => {
+  document.querySelectorAll(".leaderboard-card").forEach(card => {
+
+    card.addEventListener("mousemove", (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      const rotateY = (x / rect.width - 0.5) * 20;
+      const rotateX = (y / rect.height - 0.5) * -20;
+
+      card.style.transform = `
+        scale(1.1)
+        rotateX(${rotateX}deg)
+        rotateY(${rotateY}deg)
+      `;
+    });
+
+    card.addEventListener("mouseleave", () => {
+      card.style.transform = "";
+    });
+
+  });
+}, 500);
+// =========================
+// 🔥 DROPDOWN EVENTS LOGIC
+// =========================
+
+
+async function loadUserEvents(uid, email) {
+
+  userEmail.innerText = email;
+
+  const q = query(collection(db, "registrations"), where("userId", "==", uid));
+  const snapshot = await getDocs(q);
+
+  eventList.innerHTML = "";
+  let count = snapshot.size;
+
+  eventCount.innerText = `Events: ${count} / 3`;
+
+  if (count === 0) {
+    eventList.innerHTML = "<li>No events</li>";
+  }
+
+  snapshot.forEach(docSnap => {
+    const data = docSnap.data();
+
+   const eventName = data.eventName || data.event || data.title || "Unknown Event";
+
+   const li = document.createElement("li");
+   li.innerHTML = `
+    ${eventName}
+    <button class="cancel-btn">✖</button>
+`;
+
+    // cancel button
+    li.querySelector("button").onclick = async () => {
+      await deleteDoc(doc(db, "registrations", docSnap.id));
+      loadUserEvents(uid, email); // refresh
+    };
+
+    eventList.appendChild(li);
+  });
+}
 
 </script>
 

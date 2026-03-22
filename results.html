@@ -64,9 +64,9 @@ onSnapshot(collection(db, "results"), (snapshot) => {
 
         <h3>${data.eventName}</h3>
 
-        <p>🥇 1st: ${data.first}</p>
-        <p>🥈 2nd: ${data.second}</p>
-        <p>🥉 3rd: ${data.third}</p>
+        <p>🥇 1st: ${data.first.name} (${data.first.dept})</p>
+        <p>🥈 2nd: ${data.second.name} (${data.second.dept})</p>
+        <p>🥉 3rd: ${data.third.name} (${data.third.dept})</p>
 
       </div>
     `;

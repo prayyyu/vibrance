@@ -36,11 +36,10 @@
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword } 
+import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } 
 from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
-import { getFirestore, doc, setDoc } 
+import { getFirestore, doc, setDoc, collection, query, where, getDocs } 
 from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
-
 // 🔥 Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDM-RJYuTB1-qHU75cBJOVL_W_EpQShr_Q",
@@ -61,7 +60,41 @@ e.preventDefault();
 
 const name = document.getElementById("name").value;
 const reg = document.getElementById("reg").value;
+const dept = reg.match(/(CS|ME|EC|EE|AD|CE)/)[0];
+const regPattern = /^(VIB|LVIB)[0-9]{2}(CS|ME|EC|EE|AD|CE)[0-9]{3}$/;
+
+if (!regPattern.test(reg)) {
+  msg.innerText = "❌ Invalid Register Number (VIB23CS001 or LVIB23CS001)";
+  return;
+}
+// ✅ Extract year
+const year = reg.startsWith("LVIB") 
+  ? reg.substring(4,6) 
+  : reg.substring(3,5);
+
+// 🎯 Allowed years
+const allowedYears = ["23","24","25","26"];
+
+if (!allowedYears.includes(year)) {
+  msg.innerText = "❌ Only 2023–2026 batches allowed";
+  return;
+}
+// 🔒 Check if register number already used
+const q = query(collection(db, "users"), where("register", "==", reg));
+const snap = await getDocs(q);
+
+if (!snap.empty) {
+  alert("❌ This Register Number already has an account!");
+  return;
+}
 const email = document.getElementById("email").value;
+// ✅ Email validation
+const emailPattern = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+
+if (!emailPattern.test(email)) {
+  msg.innerText = "❌ Invalid email! Use proper Gmail (example@gmail.com)";
+  return;
+}
 const password = document.getElementById("password").value;
 
 // 🔐 Basic validation
@@ -74,36 +107,35 @@ msg.innerText = "Creating account...";
 
 try {
 
-const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-const user = userCredential.user;
+  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+  const user = userCredential.user;
 
-// 🎯 SET ROLE (ADMIN / USER)
-const role = (email === "admin@vibrance.com") ? "admin" : "user";
+  // 🔥 SEND VERIFICATION EMAIL
+  await sendEmailVerification(user);
 
-// 📦 Store in Firestore
-await setDoc(doc(db, "users", user.uid), {
-  name,
-  register: reg,
-  email,
-  role
-});
+  await setDoc(doc(db, "users", user.uid), {
+    name: name,
+    email: email,
+    register: reg,
+    department: dept,
+    isAdmin: false
+  });
 
-msg.innerText = "✔ Signup Successful";
+  // ✅ Better message
+  msg.innerText = "📩 Verification email sent! Please check your inbox before login.";
+  msg.style.color = "lightgreen";
 
-// 🔁 Redirect
-setTimeout(() => {
-  window.location.href = "login.html";
-}, 1500);
+  // 🔁 Redirect after delay
+  setTimeout(() => {
+    window.location.href = "login.html";
+  }, 2500);
 
 } catch (error) {
 
-console.error(error);
-msg.innerText = "❌ " + error.message;
+  console.error(error);
+  msg.innerText = "❌ " + error.message;
 
 }
-
-});
-
 </script>
 </body>
 </html>

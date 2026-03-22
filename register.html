@@ -8,7 +8,7 @@
   <nav>
     <a href="index.html">Home</a> |
     <a href="events.html">Events</a> |
-    <a href="register.html">Register</a>
+    <a href="results.html">Results</a>
   </nav>
 
   <div class="form-wrapper">
@@ -44,6 +44,8 @@
             <option>ECE</option>
             <option>MECH</option>
             <option>EEE</option>
+            <option>CIVIL</option>
+            <option>MCA</option>
           </select>
         </div>
 
@@ -76,7 +78,7 @@
   <!-- Firebase Backend -->
   <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, query, where, getDocs }  from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
 
   const firebaseConfig = {
@@ -95,58 +97,146 @@
   form.style.display = "none";
 
   // Check authentication state
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      // User is logged in – show form and optionally pre-fill email
-      form.style.display = "block";
-      
-      // OPTIONAL: Pre-fill email from logged-in user (if you want)
-      // document.getElementById("email").value = user.email;
-      // document.getElementById("email").readOnly = true; // make it read-only if desired
-      
-      // You could also pre-fill name from user.displayName if available
-    } else {
-      // No user – redirect to login page
-      // Save current page to redirect back after login
-      window.location.href = "login.html?redirect=" + encodeURIComponent(window.location.href);
+  onAuthStateChanged(auth, async (user) => {
+  if (user) {
+
+    form.style.display = "block";
+
+    // 🔥 FETCH USER DATA FROM FIRESTORE
+    const { doc, getDoc } = await import(
+      "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js"
+    );
+
+    const docRef = doc(db, "users", user.uid);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+
+      document.getElementById("name").value = data.name || "";
+      document.getElementById("email").value = data.email || "";
+      document.getElementById("reg").value = data.register || "";
+      const deptMap = {
+  CS: "CSE",
+  EC: "ECE",
+  ME: "MECH",
+  EE: "EEE",
+  CE: "CIVIL",
+  AD: "AD"
+};
+
+document.getElementById("department").value =
+  deptMap[data.department] || data.department || "";
+      // 🔒 lock important fields
+      document.getElementById("email").readOnly = true;
+      document.getElementById("reg").readOnly = true;
     }
-  });
+
+  } else {
+    window.location.href = "login.html?redirect=" + encodeURIComponent(window.location.href);
+  }
+});
 
   // Handle form submission
   form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    msg.innerText = "Registering...";
+  e.preventDefault();
+  msg.innerText = "Registering...";
 
-    const name = document.getElementById("name").value;
-    const reg = document.getElementById("reg").value;
-    const email = document.getElementById("email").value;
-    const dept = document.getElementById("dept").value;
-    const eventField = document.getElementById("event").value;
+  const name = document.getElementById("name").value;
+  const reg = document.getElementById("reg").value;
+ const regPattern = /^(VIB|LVIB)[0-9]{2}(CS|ME|EC|EE|AD|CE)[0-9]{3}$/;
 
-    if (!eventField) {
-      msg.innerText = "❌ No event selected. Please go back to events page.";
-      return;
-    }
+if (!regPattern.test(reg)) {
+  msg.innerText = "❌ Invalid Register Number (VIB23CS001 or LVIB23CS001)";
+  return;
+}
+// ✅ Extract year
+const year = reg.startsWith("LVIB") 
+  ? reg.substring(4,6) 
+  : reg.substring(3,5);
 
-    try {
-      // Get current user UID (optional, for tracking)
-      const user = auth.currentUser;
-      await addDoc(collection(db, "registrations"), {
-        name,
-        register: reg,
-        email,
-        department: dept,
-        event: eventField,
-        userId: user ? user.uid : null,  // store who registered
-        time: new Date()
-      });
-      msg.innerText = "✔ Registration Successful";
-      form.reset();
-    } catch (error) {
-      msg.innerText = "❌ " + error.message;
-      console.error(error);
-    }
-  });
+// 🎯 Allowed years
+const allowedYears = ["23","24","25","26"];
+
+if (!allowedYears.includes(year)) {
+  msg.innerText = "❌ Only 2023–2026 batches allowed";
+  return;
+}
+  // ✅ Auto detect department
+let dept = "";
+
+if (reg.startsWith("LVIB")) {
+  dept = reg.substring(6,8); // lateral
+} else {
+  dept = reg.substring(5,7); // normal
+}
+
+// 🔥 Set department dropdown automatically
+document.getElementById("department").value = dept;
+  const email = document.getElementById("email").value;
+  // ✅ Email validation
+const emailPattern = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+
+if (!emailPattern.test(email)) {
+  msg.innerText = "❌ Invalid email! Use proper Gmail (example@gmail.com)";
+  return;
+}
+  
+  const eventField = document.getElementById("event").value;
+ if (!eventField) {
+    msg.innerText = "❌ No event selected. Please go back to events page.";
+    return;
+  }
+
+  try {
+    const user = auth.currentUser;
+
+// 🔒 LIMIT 3 EVENTS
+const qAll = query(
+  collection(db, "registrations"),
+  where("userId", "==", user.uid)
+);
+const snapAll = await getDocs(qAll);
+
+if (snapAll.size >= 3) {
+  msg.innerText = "❌ You can register only for 3 events!";
+  return;
+}
+
+// 🔒 CHECK SAME EVENT
+const q = query(
+  collection(db, "registrations"),
+  where("userId", "==", user.uid),
+  where("event", "==", eventField)
+);
+
+const snap = await getDocs(q);
+
+if (!snap.empty) {
+  msg.innerText = "❌ You already registered for this event!";
+  return;
+}
+
+// ✅ SAVE
+await addDoc(collection(db, "registrations"), {
+  name,
+  register: reg,
+  email,
+  department: dept,
+  event: eventField,
+  userId: user.uid,
+  time: new Date()
+});
+
+    msg.innerText = "✔ Registration Successful";
+    form.reset();
+    document.getElementById("event").value = eventField;
+
+  } catch (error) {
+    msg.innerText = "❌ " + error.message;
+    console.error(error);
+  }
+});
 </script>
 </body>
 </html>

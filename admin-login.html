@@ -63,37 +63,43 @@ form.addEventListener("submit", async (e) => {
 
   try {
 
-    // 🔐 LOGIN
-    const userCred = await signInWithEmailAndPassword(auth, email, password);
-    const user = userCred.user;
+  // 🔥 STEP 1: clear old session
+  await signOut(auth);
 
-    // 🔍 CHECK ADMIN ROLE
-    const docRef = doc(db, "users", user.uid);
-    const docSnap = await getDoc(docRef);
+  // 🔐 STEP 2: login
+  await signInWithEmailAndPassword(auth, email, password);
 
-    if(docSnap.exists() && docSnap.data().isAdmin){
+  // 🔥 STEP 3: wait for correct user
+  const user = auth.currentUser;
 
-      msg.innerText = "✔ Admin login successful";
-      
-      // 👉 GO TO ADMIN PANEL
-      setTimeout(() => {
-        window.location.href = "admin.html";
-      }, 1000);
-
-    } else {
-
-      msg.innerText = "❌ Access denied (Not Admin)";
-      
-      // 🚫 LOGOUT NON-ADMIN
-      await signOut(auth);
-    }
-
-  } catch (error) {
-
-    console.error(error);
-    msg.innerText = "❌ " + error.message;
-
+  if (!user) {
+    msg.innerText = "Auth error, try again";
+    return;
   }
+
+  console.log("Logged UID:", user.uid);
+
+  // 🔍 STEP 4: check admin role
+  const docRef = doc(db, "users", user.uid);
+  const docSnap = await getDoc(docRef);
+
+  console.log("Firestore:", docSnap.data());
+
+  if (docSnap.exists() && docSnap.data().isAdmin === true) {
+
+    msg.innerText = "✔ Admin login successful";
+
+    window.location.replace("admin.html");
+
+  } else {
+
+    msg.innerText = "❌ Access denied (Not Admin)";
+    await signOut(auth);
+  }
+
+} catch (error) {
+  msg.innerText = error.message;
+}
 
 });
 
