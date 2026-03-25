@@ -100,6 +100,23 @@
   <div id="leaderboard"></div>
 </div>
 <h2>👨‍🎓 Student Registrations</h2>
+
+<div style="text-align:center; margin:20px;">
+  <select id="eventFilter" onchange="filterRegistrations()">
+    <option value="all">All Events</option>
+    <option>Thiruvathira</option>
+    <option>Singing Western Solo</option>
+    <option>Western Group</option>
+    <option>Debate</option>
+    <option>Folk Dance Boys</option>
+    <option>Group Dance</option>
+    <option>Mime</option>
+    <option>Classical Dance</option>
+    <option>Western Dance</option>
+    <option>Quiz</option>
+    <option>Light Music</option>
+  </select>
+</div>
 <div class="admin-container">
 <table class="table" id="regTable">
 <thead>
@@ -348,7 +365,6 @@ onSnapshot(collection(db,"leaderboard"),snap=>{
       </div>`;
   });
 });
-
 // ================= REG TABLE =================
 const regBody=document.querySelector("#regTable tbody");
 
@@ -356,16 +372,32 @@ onSnapshot(collection(db,"registrations"),snap=>{
   regBody.innerHTML="";
   snap.forEach(doc=>{
     const d=doc.data();
-    regBody.innerHTML+=`
-    <tr>
-      <td>${d.name}</td>
-      <td>${d.email}</td>
-      <td>${d.department}</td>
-      <td>${d.event}</td>
-    </tr>`;
+    regBody.innerHTML += `
+<tr data-event="${d.event}">
+  <td>${d.name}</td>
+  <td>${d.email}</td>
+  <td>${d.department}</td>
+  <td>${d.event}</td>
+</tr>`;
   });
 });
+window.filterRegistrations = function(){
 
+  const selected = document.getElementById("eventFilter").value;
+  const rows = document.querySelectorAll("#regTable tbody tr");
+
+  rows.forEach(row => {
+
+    const event = row.getAttribute("data-event");
+
+    if(selected === "all" || event === selected){
+      row.style.display = "";
+    } else {
+      row.style.display = "none";
+    }
+
+  });
+};
 // ================= EXPORT =================
 window.exportData = async function(){
   const snap=await getDocs(collection(db,"registrations"));
