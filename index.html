@@ -23,10 +23,10 @@
 
   <!-- CENTER -->
   <div class="nav-center">
-    <a href="index.html">Home</a>
-    <a href="events.html">Events</a>
-    <a href="results.html">Results</a>
-  </div>
+  <a href="index.html" class="active">Home</a>
+  <a href="events.html">Events</a>
+  <a href="results.html">Results</a>
+</div>
 
   <!-- RIGHT -->
   <div class="nav-right">
@@ -136,7 +136,10 @@ import {
 const firebaseConfig = {
   apiKey: "AIzaSyDM-RJYuTB1-qHU75cBJOVL_W_EpQShr_Q",
   authDomain: "vibrance-fest-1310a.firebaseapp.com",
-  projectId: "vibrance-fest-1310a"
+  projectId: "vibrance-fest-1310a",
+  storageBucket: "vibrance-fest-1310a.appspot.com",
+  messagingSenderId: "564934076568",
+  appId: "1:564934076568:web:8ef57661b9129d474208ed"
 };
 
 const app = initializeApp(firebaseConfig);

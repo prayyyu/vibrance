@@ -16,7 +16,8 @@
 <div id="adminPanel">
 
   <div class="admin-container">
-    <div class="admin-card">
+  <div class="admin-card" id="formSection">
+
 <h1>📊 Admin Dashboard</h1>
 
 <h2>Add Result</h2>
@@ -78,8 +79,7 @@
 <button onclick="addResult()">Add Result</button>
 
 </div>
-    </div>
-  </div>
+</div>
 <!-- TABLE -->
  <div class="admin-container">
 <table class="table" id="resultsTable">
@@ -191,10 +191,28 @@ window.addResult = async function(){
   const thirdDept = document.getElementById("thirdDept").value;
 
   if (!eventName || !firstName || !firstDept || !secondName || !secondDept || !thirdName || !thirdDept){
-    alert("Fill all fields ❗");
-    return;
-  }
+  alert("Fill all fields ❗");
+  return;
+}
 
+// 🚫 PREVENT SAME DEPARTMENT DUPLICATION
+if (firstDept === secondDept || firstDept === thirdDept || secondDept === thirdDept){
+  alert("❌ Same department cannot win multiple positions in the same event!");
+  return;
+}
+const existing = await getDocs(collection(db,"results"));
+let eventExists = false;
+
+existing.forEach(doc=>{
+  if(doc.data().eventName === eventName && doc.id !== window.editId){
+    eventExists = true;
+  }
+});
+
+if(eventExists){
+  alert("⚠️ This event already has results!");
+  return;
+}
   if(window.editId){
     await updateDoc(doc(db,"results",window.editId),{
       eventName,
@@ -241,6 +259,13 @@ window.editResult = function(id){
   document.getElementById("thirdDept").value = data.third.dept;
 
   window.editId = id;
+
+  // 🔥 AUTO SCROLL TO FORM
+  document.getElementById("formSection").scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
+
 };
 // ================= REBUILD LEADERBOARD =================
 async function rebuildLeaderboard(){

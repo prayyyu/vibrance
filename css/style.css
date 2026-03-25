@@ -27,42 +27,34 @@ p {
   font-size: 18px;
 }
 .navbar{
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:15px 30px;
-position:sticky;
-top:0;
-z-index:1000;
-background:rgba(26,0,51,0.8);
-backdrop-filter:blur(10px);
+  display: flex;
+  align-items: center;
+  padding: 15px 30px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: rgba(26,0,51,0.8);
+  backdrop-filter: blur(10px);
 }
+
 /* LEFT */
 .nav-left{
-flex:1;
-text-align:left;
+  flex: 1;
 }
 
-/* CENTER */
+/* CENTER (IMPORTANT) */
 .nav-center{
-flex:1;
-text-align:center;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  gap: 30px;
 }
 
-.nav-center a{
-margin:0 15px;
-color:white;
-text-decoration:none;
-font-weight:bold;
-}
-
-/* RIGHT */
+/* RIGHT (ADD THIS EVEN IF EMPTY) */
 .nav-right{
-flex:1;
-display:flex;
-justify-content:flex-end;
-align-items:center;
-gap:10px;
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
 }
 
 #userName{
@@ -997,12 +989,12 @@ board {
 .admin-card{
   background: rgba(255,255,255,0.08) !important;
   backdrop-filter: blur(20px);
-  padding:40px !important;
+  padding:25px 40px !important;
   width:100%;
   max-width:700px;
   border-radius:20px;
   box-shadow:0 20px 60px rgba(0,0,0,0.6);
-  margin:auto;
+  margin-top: 0;
   border:1px solid rgba(255,255,255,0.15);
   transition:0.3s;
 }
@@ -1304,4 +1296,20 @@ button:hover {
 /* REST */
 .leaderboard-card:nth-child(n+4) {
   opacity: 0.85;
+}
+/* ===== ACTIVE NAV LINK ===== */
+.nav-center a.active {
+  color: #ffd700;
+  font-weight: bold;
+}
+
+.nav-center a.active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -5px;
+  width: 100%;
+  height: 2px;
+  background: #ffd700;
+  border-radius: 2px;
 }
